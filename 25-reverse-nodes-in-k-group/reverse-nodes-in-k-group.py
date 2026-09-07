@@ -1,25 +1,35 @@
 class Solution:
     def reverseKGroup(self, head: Optional[ListNode], k: int) -> Optional[ListNode]:
         # Helper to check if there are at least k nodes remaining
-        curr = head
-        count = 0
-        while curr and count < k:
-            curr = curr.next
-            count += 1
-        
-        if count < k:
-            return head
-        
-        # Reverse the first k nodes
-        prev = None
-        curr = head
-        for _ in range(k):
-            next_node = curr.next
-            curr.next = prev
-            prev = curr
-            curr = next_node
+        def get_kth_node(curr, k_val):
+            while curr and k_val > 0:
+                curr = curr.next
+                k_val -= 1
+            return curr
+
+        dummy = ListNode(0, head)
+        group_prev = dummy
+
+        while True:
+            # Find the k-th node from the current group's start
+            kth = get_kth_node(group_prev, k)
+            if not kth:
+                break
             
-        # Recursively reverse the remaining linked list and connect
-        head.next = self.reverseKGroup(curr, k)
-        
-        return prev
+            group_next = kth.next
+
+            # Reverse the k nodes
+            prev = kth.next
+            curr = group_prev.next
+            while curr != group_next:
+                nxt = curr.next
+                curr.next = prev
+                prev = curr
+                curr = nxt
+
+            # Connect the reversed group back to the main list
+            temp = group_prev.next
+            group_prev.next = kth
+            group_prev = temp
+
+        return dummy.next
